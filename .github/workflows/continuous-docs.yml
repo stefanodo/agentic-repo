@@ -55,7 +55,7 @@ jobs:
 
       - name: 📥 Checkout PR branch
         if: ${{ steps.author_check.outputs.allowed == 'true' }}
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
           ref: ${{ inputs.head_ref || github.event.pull_request.head.ref }}
