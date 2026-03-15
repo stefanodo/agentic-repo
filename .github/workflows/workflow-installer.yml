@@ -29,7 +29,8 @@ on:
           - 'false'
 
 permissions:
-  contents: read
+  contents: write
+  pull-requests: write
 
 jobs:
   install:
@@ -42,12 +43,20 @@ jobs:
 
       - name: 🚀 Install caller workflows to target repos
         env:
-          GH_TOKEN: ${{ secrets.COPILOT_PAT }}
+          GH_TOKEN: ${{ secrets.COPILOT_PAT || github.token }}
           TARGET_REPOS: ${{ inputs.target_repos }}
           WORKFLOWS: ${{ inputs.workflows }}
           CREATE_PR: ${{ inputs.create_pr }}
         run: |
           OWNER="0GiS0"
+
+          # Preflight: gh CLI requires GH_TOKEN in Actions. We fallback to github.token,
+          # but cross-repository writes typically require a PAT (COPILOT_PAT).
+          if [ -z "$GH_TOKEN" ]; then
+            echo "❌ GH_TOKEN is empty."
+            echo "Set repository secret COPILOT_PAT in this repository with permissions to target repos."
+            exit 1
+          fi
 
           # Determine which workflow files to install
           if [ "$WORKFLOWS" = "all" ]; then
